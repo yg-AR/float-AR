@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
         body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; background: #000; }
-
+        
         /* 開始ボタン（前回のデザインを継承） */
         #start-button {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -26,45 +26,43 @@
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: yes;" 
         vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false"
         renderer="colorManagement: true, precision: medium">
-
+        
         <a-assets>
             <img id="nicole-img" src="./ニコル.png">
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-       <a-entity id="t" mindar-image-target="targetIndex: 0">
-    <a-image id="ar-image" src="#nicole-img" 
-        width="1" height="1" 
-        position="0 0.2 0.1" 
-        rotation="45 0 0" 
-        visible="false">
-    </a-image>
-</a-entity>
+        <a-entity id="t" mindar-image-target="targetIndex: 0">
+            <a-image id="ar-image" src="#nicole-img" 
+                     width="1" height="1.2" 
+                     position="0 0 0.1" 
+                     visible="false"></a-image>
+        </a-entity>
+    </a-scene>
 
-<script>
-    const arImageObj = document.querySelector("#ar-image");
-    const startBtn = document.querySelector("#start-button");
-    const targetEl = document.querySelector('#t'); // ここを上に移動させると安全です
+    <script>
+        const arImageObj = document.querySelector("#ar-image");
+        const startBtn = document.querySelector("#start-button");
 
-    function startAR() {
-        const sceneEl = document.querySelector('a-scene');
-        const arSystem = sceneEl.systems["mindar-image-system"];
-        startBtn.style.display = "none";
-        arSystem.start(); 
-    }
+        function startAR() {
+            const sceneEl = document.querySelector('a-scene');
+            const arSystem = sceneEl.systems["mindar-image-system"];
+            startBtn.style.display = "none";
+            arSystem.start(); // ARエンジンの起動
+        }
 
-    // イベント名を修正：mindar-image-targetfound
-    targetEl.addEventListener("mindar-image-targetfound", () => {
-        console.log("ニコルを発見！");
-        arImageObj.setAttribute("visible", "true");
-    });
+        const targetEl = document.querySelector('#t');
 
-    // イベント名を修正：mindar-image-targetlost
-    targetEl.addEventListener("mindar-image-targetlost", () => {
-        console.log("ニコルを見失った");
-        arImageObj.setAttribute("visible", "false");
-    });
-</script>
+        // 認識した時：画像を表示
+        targetEl.addEventListener("targetFound", () => {
+            arImageObj.setAttribute("visible", "true");
+        });
+
+        // 見失った時：画像を非表示
+        targetEl.addEventListener("targetLost", () => {
+            arImageObj.setAttribute("visible", "false");
+        });
+    </script>
 </body>
 </html>
