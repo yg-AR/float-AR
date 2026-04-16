@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>2.5D AR Nicole - Flash Effect</title>
+    <title>2.5D AR Nicole</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
         body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; background: #000; }
-        
+
         /* 開始ボタン（前回のデザインを継承） */
         #start-button {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -17,77 +17,46 @@
             font-size: 18px; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             cursor: pointer;
         }
-
-        /* --- 演出用：点滅（フラッシュ）用の白い画面 --- */
-        #flash-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: white; opacity: 0; z-index: 9998; /* ボタン(9999)のすぐ下 */
-            pointer-events: none; /* 下の操作を邪魔しない */
-        }
-
-        /* 点滅アニメーション */
-        .run-flash {
-            animation: flashAnimation 0.5s ease-out;
-        }
-        @keyframes flashAnimation {
-            0% { opacity: 0; }
-            20% { opacity: 1; } /* 一瞬で真っ白 */
-            100% { opacity: 0; } /* 徐々に消える */
-        }
     </style>
 </head>
 <body>
-    <div id="flash-overlay"></div>
-
     <button id="start-button" onclick="startAR()">ARを開始する</button>
 
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiScanning: yes;" 
         vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false"
         renderer="colorManagement: true, precision: medium">
-        
+
         <a-assets>
             <img id="nicole-img" src="./ニコル.png">
         </a-assets>
-
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
         <a-entity id="t" mindar-image-target="targetIndex: 0">
            <a-image id="ar-image" src="#nicole-img" 
-            width="1" height="1" 
-            position="0 0.2 0.1" 
-            rotation="45 0 0" 
-            visible="false"></a-image>
+         width="1" height="1" 
+         position="0 0.2 0.1" 
+         rotation="45 0 0" 
+         visible="false"></a-image>
         </a-entity>
     </a-scene>
 
     <script>
         const arImageObj = document.querySelector("#ar-image");
         const startBtn = document.querySelector("#start-button");
-        const flashOverlay = document.querySelector("#flash-overlay");
-        const targetEl = document.querySelector('#t');
-
         function startAR() {
             const sceneEl = document.querySelector('a-scene');
             const arSystem = sceneEl.systems["mindar-image-system"];
             startBtn.style.display = "none";
-            arSystem.start(); 
+            arSystem.start(); // ARエンジンの起動
         }
+        const targetEl = document.querySelector('#t');
 
-        // 認識した時：点滅演出＋画像を表示
+        // 認識した時：画像を表示
         targetEl.addEventListener("targetFound", () => {
-            // 1. 点滅アニメーションを実行
-            flashOverlay.classList.remove('run-flash');
-            void flashOverlay.offsetWidth; // リセット用ハック
-            flashOverlay.classList.add('run-flash');
-
-            // 2. フラッシュが一番明るいタイミング（約0.1秒後）で画像を表示
-            setTimeout(() => {
-                arImageObj.setAttribute("visible", "true");
-            }, 100);
+            arImageObj.setAttribute("visible", "true");
         });
 
-        // 見失った時：画像を非表示（次に備えて）
+        // 見失った時：画像を非表示
         targetEl.addEventListener("targetLost", () => {
             arImageObj.setAttribute("visible", "false");
         });
